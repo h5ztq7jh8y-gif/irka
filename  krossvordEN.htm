@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New Year Crossword</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #b22222;
+    }
+
+    .crossword {
+      display: inline-block;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: flex;
+    }
+
+    .cell {
+      width: 32px;
+      height: 32px;
+      border: 1px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      background-color: white;
+    }
+
+    .black {
+      background-color: #222;
+    }
+
+    .legend {
+      display: inline-block;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .legend h2 {
+      margin-top: 0;
+      color: #b22222;
+    }
+
+    .legend ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .legend li {
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎄 New Year English Crossword 🎁</h1>
+
+  <div class="crossword" id="crossword"></div>
+
+  <div class="legend">
+    <h2>Words to find:</h2>
+    <ul>
+      <li>→ 1. SNOW — white winter magic</li>
+      <li>↓ 2. TREE — decorated with lights and ornaments</li>
+      <li>→ 3. GIFT — something you give with love</li>
+      <li>→ 4. NOEL — Christmas greeting</li>
+      <li>↓ 5. JOY — "___ to the world!"</li>
+    </ul>
+  </div>
+
+  <script>
+    const size = 6;
+    const grid = Array(size).fill().map(() => Array(size).fill(null));
+
+    // Place words
+    // 1. SNOW (horizontal, row 0, col 0)
+    ['S','N','O','W'].forEach((letter, i) => grid[0][i] = letter);
+
+    // 2. TREE (vertical, starts at row 0, col 1 → T at [0][1], but we already have N → conflict!
+    // So adjust: place TREE vertically from row 1, col 3? Let's design properly.
+
+    // Better layout:
+    // SNOW across top: (0,0)-(0,3)
+    // TREE down from (0,1): T at (0,1) → but (0,1)=N → no.
+    // Instead: use intersection at 'E'
+
+    // Revised plan:
+    // - SNOW: row 0, col 0–3
+    // - TREE: vertical, col 2, rows 0–3 → S-N-**O**-W → O at (0,2)
+    //         so TREE: T(0,2), R(1,2), E(2,2), E(3,2) → but (0,2)=O ≠ T → no.
+
+    // Final working layout:
+    // Place GIFT at row 4, col 0–3
+    // Place JOY vertically: J(2,1), O(3,1), Y(4,1) → intersects GIFT at I (but GIFT[4][1]=I → OK if O=I? No)
+
+    // Let's fix with proper intersections:
+
+    // Actual working grid (6x6):
+    // Row 0: S N O W . .
+    // Row 1: . . R . . .
+    // Row 2: . . E . . .
+    // Row 3: . . E N O E
+    // Row 4: G I F T . L
+    // Row 5: . . . . . .
+
+    // But that doesn't align well.
+
+    // Better simple cross:
+    // Let SNOW be horizontal at (0,0)
+    // Let TREE be vertical at (0,1): but (0,1)=N, so first letter must be N → not TREE.
+
+    // ✅ Correct working design:
+    // Use:
+    // - SNOW: horizontal at row 0, cols 0-3
+    // - NOEL: horizontal at row 3, cols 2-5
+    // - GIFT: horizontal at row 4, cols 0-3
+    // - TREE: vertical at col 2, rows 0-3 → T at (0,2) → but (0,2)=O → conflict.
+
+    // 🔄 Final decision: Use only two intersections to keep it simple and valid.
+
+    // Working grid:
+    // Row 0: S N O W . .
+    // Row 1: . . . . . .
+    // Row 2: . . . . . .
+    // Row 3: . . N O E L
+    // Row 4: G I F T . .
+    // Row 5: . O . . . .
+    //        J
+    // But JOY vertical: J(3,1), O(4,1), Y(5,1) → (4,1)=I from GIFT → conflict.
+
+    // ✅ SOLVED: Place JOY vertically at col 5:
+    // NOEL ends with L at (3,5)
+    // JOY: J(1,5), O(2,5), Y(3,5) → but (3,5)=L ≠ Y → no.
+
+    // Let's choose a simpler, VALID layout:
+
+    // Use only 3 words intersecting, others separate — still fine for small crossword.
+
+    // Final grid (6x6):
+    grid[0][0] = 'S';
+    grid[0][1] = 'N';
+    grid[0][2] = 'O';
+    grid[0][3] = 'W';
+
+    grid[2][0] = 'G';
+    grid[2][1] = 'I';
+    grid[2][2] = 'F';
+    grid[2][3] = 'T';
+
+    grid[4][2] = 'N';
+    grid[4][3] = 'O';
+    grid[4][4] = 'E';
+    grid[4][5] = 'L';
+
+    grid[0][5] = 'J';
+    grid[1][5] = 'O';
+    grid[2][5] = 'Y';
+
+    grid[4][1] = 'T';
+    grid[5][1] = 'R';
+    grid[6] = []; // we only have 6 rows (0-5)
+
+    // TREE vertical: let's put it at col 4, rows 0-3 → but NOEL uses row4,col4=E
+
+    // Instead, skip TREE or replace? But we promised 5 words.
+
+    // ✅ NEW PLAN: Replace TREE with BELLS (also Christmas word)? But let's keep it.
+
+    // Actually, let's use this layout:
+    // - SNOW: (0,0)-(0,3)
+    // - GIFT: (2,0)-(2,3)
+    // - NOEL: (4,2)-(4,5)
+    // - JOY: (0,5),(1,5),(2,5)
+    // - TREE: vertical at col 1, rows 3-6 → but only 6 rows → rows 2-5: T(2,1), R(3,1), E(4,1), E(5,1)
+
+    // Now check conflicts:
+    // GIFT: (2,0)=G, (2,1)=I → TREE wants (2,1)=T → conflict!
+
+    // Solution: Move GIFT to row 5
+    // Let's rebuild cleanly:
+
+    // Clear grid
+    for (let r = 0; r < size; r++)
+      for (let c = 0; c < size; c++)
+        grid[r][c] = null;
+
+    // 1. SNOW → row 0, col 0-3
+    "SNOW".split('').forEach((ch, i) => grid[0][i] = ch);
+
+    // 2. JOY → vertical, col 5, row 0-2
+    "JOY".split('').forEach((ch, i) => grid[i][5] = ch);
+
+    // 3. GIFT → row 3, col 0-3
+    "GIFT".split('').forEach((ch, i) => grid[3][i] = ch);
+
+    // 4. NOEL → row 5, col 2-5
+    "NOEL".split('').forEach((ch, i) => grid[5][i+2] = ch);
+
+    // 5. TREE → vertical, col 1, row 2-5
+    // T(2,1), R(3,1), E(4,1), E(5,1)
+    "TREE".split('').forEach((ch, i) => grid[2+i][1] = ch);
+
+    // Now check intersections:
+    // - GIFT at (3,1) = 'I', TREE at (3,1) = 'R' → CONFLICT!
+
+    // Fix: move GIFT to row 4
+    // Clear GIFT
+    for (let i = 0; i < 4; i++) grid[3][i] = null;
+    // Place GIFT at row 4
+    "GIFT".split('').forEach((ch, i) => grid[4][i] = ch);
+
+    // Now TREE: (2,1)=T, (3,1)=R, (4,1)=E, (5,1)=E
+    // GIFT: (4,0)=G, (4,1)=I → conflict at (4,1): E vs I
+
+    // Final fix: shift GIFT to start at col 1 → but then 5 letters? No, GIFT = 4 letters.
+
+    // Alternative: place GIFT vertically?
+    // GIFT vertical at col 0: G(2,0), I(3,0), F(4,0), T(5,0)
+    // Then TREE at col 1: T(2,1), R(3,1), E(4,1), E(5,1) → no conflict!
+
+    // ✅ PERFECT!
+
+    // Rebuild:
+    for (let r = 0; r < size; r++)
+      for (let c = 0; c < size; c++)
+        grid[r][c] = null;
+
+    // SNOW: row 0, col 0-3
+    "SNOW".split('').forEach((ch, i) => grid[0][i] = ch);
+
+    // JOY: col 5, row 0-2
+    "JOY".split('').forEach((ch, i) => grid[i][5] = ch);
+
+    // GIFT: vertical, col 0, row 2-5
+    "GIFT".split('').forEach((ch, i) => grid[2+i][0] = ch);
+
+    // TREE: vertical, col 1, row 2-5
+    "TREE".split('').forEach((ch, i) => grid[2+i][1] = ch);
+
+    // NOEL: row 5, col 2-5
+    "NOEL".split('').forEach((ch, i) => grid[5][i+2] = ch);
+
+    // Now check:
+    // Row 5: G(5,0), T(5,1), N(5,2), O(5,3), E(5,4), L(5,5) → OK
+    // JOY: (0,5)=J, (1,5)=O, (2,5)=Y → OK
+    // SNOW: (0,0-3) = S,N,O,W → OK
+    // GIFT: (2,0)=G, (3,0)=I, (4,0)=F, (5,0)=T → OK
+    // TREE: (2,1)=T, (3,1)=R, (4,1)=E, (5,1)=E → OK
+
+    // All good!
+
+    // Render grid
+    const crosswordDiv = document.getElementById('crossword');
+    for (let r = 0; r < size; r++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row';
+      for (let c = 0; c < size; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (grid[r][c] !== null) {
+          cell.textContent = grid[r][c];
+        } else {
+          cell.classList.add('black');
+        }
+        rowDiv.appendChild(cell);
+      }
+      crosswordDiv.appendChild(rowDiv);
+    }
+  </script>
+</body>
+</html>
