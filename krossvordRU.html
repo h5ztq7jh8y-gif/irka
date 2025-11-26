@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Новогодний кроссворд</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f7ff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #d40000;
+    }
+
+    .crossword {
+      display: inline-block;
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .row {
+      display: flex;
+    }
+
+    .cell {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      background-color: #ffffff;
+    }
+
+    .black {
+      background-color: #000;
+    }
+
+    .legend {
+      margin-top: 20px;
+      text-align: left;
+      display: inline-block;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .legend h2 {
+      margin-top: 0;
+      color: #d40000;
+    }
+
+    .legend ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .legend li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪄 Новогодний кроссворд 🎄</h1>
+
+  <div class="crossword" id="crossword"></div>
+
+  <div class="legend">
+    <h2>Слова кроссворда:</h2>
+    <ul>
+      <li>1. 🎄 Елка</li>
+      <li>2. 🎉 Праздник</li>
+      <li>3. 🎁 Подарок</li>
+      <li>4. ❄️ Снег</li>
+      <li>5. 🦌 Олени</li>
+      <li>6. 🧊 Мороз</li>
+      <li>7. 💡 Гирлянды</li>
+      <li>8. 🐟 Икра</li>
+      <li>9. 🥗 Салаты</li>
+      <li>10. 👔 Путин</li>
+    </ul>
+  </div>
+
+  <script>
+    // Размер сетки кроссворда (12x12)
+    const size = 12;
+    const grid = Array(size).fill().map(() => Array(size).fill(null));
+
+    // Функция для установки слова по горизонтали
+    function placeWordHorizontal(word, row, col) {
+      for (let i = 0; i < word.length; i++) {
+        if (col + i < size) {
+          grid[row][col + i] = word[i].toUpperCase();
+        }
+      }
+    }
+
+    // Функция для установки слова по вертикали
+    function placeWordVertical(word, row, col) {
+      for (let i = 0; i < word.length; i++) {
+        if (row + i < size) {
+          grid[row + i][col] = word[i].toUpperCase();
+        }
+      }
+    }
+
+    // Размещаем слова с пересечениями
+    placeWordHorizontal("ЕЛКА", 1, 2);         // Горизонталь
+    placeWordVertical("ПРАЗДНИК", 1, 2);       // Пересекает "ЕЛКА" по "Е"
+    placeWordHorizontal("ПОДАРОК", 5, 1);       // Горизонталь
+    placeWordVertical("СНЕГ", 5, 3);           // Пересекает "ПОДАРОК" по "А"
+    placeWordHorizontal("ОЛЕНИ", 3, 4);        // Горизонталь
+    placeWordVertical("МОРОЗ", 4, 7);          // Вертикаль
+    placeWordHorizontal("ГИРЛЯНДЫ", 8, 0);     // Горизонталь (9 букв)
+    placeWordVertical("ИКРА", 8, 1);           // Пересекает "ГИРЛЯНДЫ" по "И"
+    placeWordHorizontal("САЛАТЫ", 10, 2);      // Горизонталь
+    placeWordVertical("ПУТИН", 6, 9);          // Вертикаль
+
+    // Создание HTML-сетки
+    const crosswordDiv = document.getElementById('crossword');
+    for (let r = 0; r < size; r++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row';
+      for (let c = 0; c < size; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (grid[r][c] !== null) {
+          cell.textContent = grid[r][c];
+        } else {
+          cell.classList.add('black');
+        }
+        rowDiv.appendChild(cell);
+      }
+      crosswordDiv.appendChild(rowDiv);
+    }
+  </script>
+</body>
+</html>
