@@ -47,17 +47,19 @@
              title="рождественский орнамент иконки">Рождественский орнамент иконки от Pixelmeetup - Flaticon</a>
 </p>
 </body>
-  def gcd(a, b):
+ import math
+
+def gcd(a, b):
     while b:
         a, b = b, a % b
     return a
 
 def mod_inverse(e, phi):
-    # Наивный поиск d: (e * d) % phi == 1
+    # Находит d такое, что (e * d) % phi == 1
     for d in range(1, phi):
         if (e * d) % phi == 1:
             return d
-    raise ValueError("Обратный элемент не найден")
+    raise ValueError("Обратного элемента не существует")
 
 # 1. Выбираем простые числа
 p = 3
@@ -71,23 +73,26 @@ phi = (p - 1) * (q - 1)
 
 # 4. Выбираем e
 e = 3
-assert 1 < e < phi, "e должно быть в диапазоне (1, φ(n))"
-assert gcd(e, phi) == 1, "e и φ(n) должны быть взаимно простыми"
+if not (1 < e < phi and gcd(e, phi) == 1):
+    raise ValueError("Некорректное значение e")
 
 # 5. Находим d
 d = mod_inverse(e, phi)
 
-print(f"Открытый ключ: (n={n}, e={e})")
+print(f"p = {p}, q = {q}")
+print(f"n = {n}")
+print(f"φ(n) = {phi}")
+print(f"e = {e}")
+print(f"d = {d}")
+print(f"\nОткрытый ключ: (n={n}, e={e})")
 print(f"Закрытый ключ: (n={n}, d={d})")
 
 # Пример шифрования и расшифровки
-message = 2  # Должно быть: 0 <= message < n
-assert 0 <= message < n, "Сообщение должно быть меньше n"
+message = 2  # Должно быть 0 < message < n и желательно взаимно просто с n
+if message >= n:
+    raise ValueError("Сообщение должно быть меньше n")
 
-# Шифрование: c = m^e mod n
 ciphertext = pow(message, e, n)
-
-# Расшифровка: m = c^d mod n
 decrypted = pow(ciphertext, d, n)
 
 print(f"\nИсходное сообщение: {message}")
@@ -98,4 +103,5 @@ print(f"Расшифрованное сообщение: {decrypted}")
 if message == decrypted:
     print("\n✅ Успешно! Сообщение расшифровано верно.")
 else:
-    print("\n❌ Ошибка! Расшифровка не удалась.")
+    print("\n❌ Ошибка расшифровки!")
+  
