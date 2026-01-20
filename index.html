@@ -47,61 +47,237 @@
              title="рождественский орнамент иконки">Рождественский орнамент иконки от Pixelmeetup - Flaticon</a>
 </p>
 </body>
- import math
+# Генерация HTML-страницы с интерактивным RSA-калькулятором (учебный пример)
+html_code = '''
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учебный RSA-калькулятор</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Учебный RSA-калькулятор</h1>
+        <p>Этот пример использует <strong>очень маленькие числа</strong> для наглядности. В реальности RSA использует числа длиной более 600 цифр!</p>
 
-def gcd(a, b):
-    while b:
-        a, b = b, a % b
-    return a
+        <label for="p">Простое число p:</label>
+        <input type="number" id="p" value="3" min="2">
 
-def mod_inverse(e, phi):
-    # Находит d такое, что (e * d) % phi == 1
-    for d in range(1, phi):
-        if (e * d) % phi == 1:
-            return d
-    raise ValueError("Обратного элемента не существует")
+        <label for="q">Простое число q:</label>
+        <input type="number" id="q" value="5" min="2">
 
-# 1. Выбираем простые числа
-p = 3
-q = 5
+        <label for="e">Открытая экспонента e (1 &lt; e &lt; φ(n)):</label>
+        <input type="number" id="e" value="3" min="2">
 
-# 2. Вычисляем n
-n = p * q
+        <label for="m">Сообщение m (0 &lt; m &lt; n):</label>
+        <input type="number" id="m" value="2" min="1">
 
-# 3. Вычисляем φ(n)
-phi = (p - 1) * (q - 1)
+        <button onclick="calculateRSA()">Рассчитать и зашифровать</button>
 
-# 4. Выбираем e
-e = 3
-if not (1 < e < phi and gcd(e, phi) == 1):
-    raise ValueError("Некорректное значение e")
+        <div id="result" class="result" style="display:none;"></div>
 
-# 5. Находим d
-d = mod_inverse(e, phi)
+        <div class="warning">
+            ⚠️ <strong>Внимание:</strong> Этот калькулятор предназначен только для обучения. 
+            Никогда не используйте такие маленькие параметры в реальных системах!
+        </div>
+    </div>
 
-print(f"p = {p}, q = {q}")
-print(f"n = {n}")
-print(f"φ(n) = {phi}")
-print(f"e = {e}")
-print(f"d = {d}")
-print(f"\nОткрытый ключ: (n={n}, e={e})")
-print(f"Закрытый ключ: (n={n}, d={d})")
+    <script>
+        function gcd(a, b) {
+            while (b !== 0) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
 
-# Пример шифрования и расшифровки
-message = 2  # Должно быть 0 < message < n и желательно взаимно просто с n
-if message >= n:
-    raise ValueError("Сообщение должно быть меньше n")
+        function modInverse(e, phi) {
+            // Находит d такое, что (e * d) % phi == 1
+            for (let d = 1; d < phi; d++) {
+                if ((e * d) % phi === 1) {
+                    return d;
+                }
+            }
+            return null; // не существует
+        }
 
-ciphertext = pow(message, e, n)
-decrypted = pow(ciphertext, d, n)
+        function isPrime(num) {
+            if (num < 2) return false;
+            if (num === 2) return true;
+            if (num % 2 === 0) return false;
+            for (let i = 3; i <= Math.sqrt(num); i += 2) {
+                if (num % i === 0) return false;
+            }
+            return true;
+        }
 
-print(f"\nИсходное сообщение: {message}")
-print(f"Шифртекст: {ciphertext}")
-print(f"Расшифрованное сообщение: {decrypted}")
+        function calculateRSA() {
+            const p = parseInt(document.getElementById('p').value);
+            const q = parseInt(document.getElementById('q').value);
+            const e = parseInt(document.getElementById('e').value);
+            const m = parseInt(document.getElementById('m').value);
 
-# Проверка
-if message == decrypted:
-    print("\n✅ Успешно! Сообщение расшифровано верно.")
-else:
-    print("\n❌ Ошибка расшифровки!")
-  
+            let output = '';
+
+            // Проверка простоты
+            if (!isPrime(p)) {
+                output += `❌ p = ${p} не является простым числом!\\n`;
+            }
+            if (!isPrime(q)) {
+                output += `❌ q = ${q} не является простым числом!\\n`;
+            }
+            if (output) {
+                document.getElementById('result').innerText = output;
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+
+            const n = p * q;
+            const phi = (p - 1) * (q - 1);
+
+            output += `Шаг 1: p = ${p}, q = ${q}\\n`;
+            output += `Шаг 2: n = p × q = ${n}\\n`;
+            output += `Шаг 3: φ(n) = (p−1)(q−1) = ${phi}\\n`;
+
+            // Проверка e
+            if (e <= 1 || e >= phi) {
+                output += `❌ e должно быть: 1 < e < φ(n) (${phi})\\n`;
+                document.getElementById('result').innerText = output;
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+            if (gcd(e, phi) !== 1) {
+                output += `❌ e = ${e} и φ(n) = ${phi} не взаимно просты (НОД = ${gcd(e, phi)})\\n`;
+                document.getElementById('result').innerText = output;
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+
+            output += `Шаг 4: e = ${e} (НОД(${e}, ${phi}) = 1 → ✅)\\n`;
+
+            const d = modInverse(e, phi);
+            if (d === null) {
+                output += `❌ Не удалось найти d для e = ${e} и φ(n) = ${phi}\\n`;
+                document.getElementById('result').innerText = output;
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+
+            output += `Шаг 5: d = ${d}, так как (${e} × ${d}) mod ${phi} = ${(e * d) % phi}\\n\\n`;
+
+            output += `🔑 Открытый ключ: (n=${n}, e=${e})\\n`;
+            output += `🔑 Закрытый ключ: (n=${n}, d=${d})\\n\\n`;
+
+            // Проверка сообщения
+            if (m <= 0 || m >= n) {
+                output += `❌ Сообщение m должно быть: 0 < m < n (${n})\\n`;
+                document.getElementById('result').innerText = output;
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+
+            // Шифрование
+            const C = modExp(m, e, n);
+            const M = modExp(C, d, n);
+
+            output += `📩 Сообщение: m = ${m}\\n`;
+            output += `🔒 Шифрование: C = m^e mod n = ${m}^${e} mod ${n} = ${C}\\n`;
+            output += `🔓 Расшифровка: M = C^d mod n = ${C}^${d} mod ${n} = ${M}\\n\\n`;
+
+            if (M === m) {
+                output += `✅ Успешно! Исходное сообщение восстановлено.\\n`;
+            } else {
+                output += `❌ Ошибка! Расшифрованное сообщение (${M}) ≠ исходному (${m}).\\n`;
+            }
+
+            document.getElementById('result').innerText = output;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        // Быстрое возведение в степень по модулю
+        function modExp(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+    </script>
+</body>
+</html>
+'''
+
+# Сохраняем в файл
+with open("rsa_calculator.html", "w", encoding="utf-8") as f:
+    f.write(html_code)
+
+"rsa_calculator.html создан!"
